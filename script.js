@@ -23,9 +23,15 @@ if(listingForm){
   if(params.size)applyFilters();
 }
 
-document.querySelectorAll('.contact-form').forEach(form=>form.addEventListener('submit',event=>{
+/*ARGUS-moduli*/
+document.querySelectorAll('.contact-form').forEach(form=>form.addEventListener('submit',async event=>{
   event.preventDefault();
-  const message=form.querySelector('.form-message');
-  if(message)message.textContent='Grazie! La richiesta è stata registrata in questa demo. Per ricevere i messaggi collega il sito a un servizio di invio.';
-  form.reset();
+  const message=form.querySelector('.form-message');const button=form.querySelector('button[type=submit]');
+  const data={azione:'modulo_dama',tipo:form.dataset.tipo||'contatto',pagina:location.pathname};for(const el of form.elements){if(el.name)data[el.name]=el.value;}
+  if(button)button.disabled=true;if(message)message.textContent='Invio in corso…';
+  try{const r=await fetch("https://script.google.com/macros/s/AKfycbyXirMx9wwWZL1hlGQ1-7yRYM8Fc_GwPYI4YGJduIiz0tsi4uZPB1I6LQCFK88UBb26DA/exec",{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(data)});const j=await r.json();
+    if(!j.ok)throw new Error(j.errore||'errore');if(message)message.textContent='Grazie! Abbiamo ricevuto la richiesta: ti ricontattiamo al più presto.';form.reset();}
+  catch(e){if(message)message.innerHTML='Non siamo riusciti a inviare il modulo. Scrivici su <a href="https://wa.me/393505827188">WhatsApp</a> o a <a href="mailto:info@immobiliaredama.eu">info@immobiliaredama.eu</a>.';}
+  finally{if(button)button.disabled=false;}
 }));
+/*/ARGUS-moduli*/
